@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://unpkg.com/obniz@3.x/obniz.js" crossorigin="anonymous" ></script>
+  </head>
+  <body>
+    <div id="obniz-debug"></div>
+    <div class="container">
+      <div class="text-center">
+        <h3>冬でも水分摂ろうよ！！</h3>
+      </div>
+    </div>
+
+    <script>
+      //type in your obniz ID
+      var obniz = new Obniz("OBNIZ_ID_HERE");
+      var sensor;
+
+      //during obniz connectionv
+      obniz.onconnect = async function() {
+        //wire LED to obniz
+        //io0: anode
+        //io1: cathode
+        var led = obniz.wired("LED", { anode: 0, cathode: 1 });
+
+        // Initialize Temp Sensor
+        sensor = obniz.wired("hx711" , {gnd:8, dout:9, sck:10, vcc:11});
+
+        // 重量測定
+        sensor.setScale(441.9);
+        var value = await sensor.getValueWait(5); //5 times average
+        console.log('grams:' + value);
+
+        while (value > 400 ) {
+          led.on();
+          sensor.setScale(441.9);
+          var value = await sensor.getValueWait(5); //5 times average
+          console.log('grams:' + value);
+        }
+        obniz.display.print("😁👍");
+
+        // sleep next 120 minutes. 120分間スリープをデバイスに指示
+        obniz.sleepMinute(120);
+      };
+    </script>
+  </body>
+</html>
